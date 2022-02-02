@@ -35,21 +35,21 @@ var data = {
         cat1: {
             heure: 4,
             journee: 40,
-            KMSInf100: 0.45,
+            KMSInf100: 0.42,
             dimancheHeure: 3,
             dimancheDay: 30
         },
         cat2: {
             heure: 5,
             journee: 50,
-            KMSInf100: 0.50,
+            KMSInf100: 0.47,
             dimancheHeure: 4,
             dimancheDay: 40
         },
         cat3: {
             heure: 6,
             journee: 60,
-            KMSInf100: 0.55,
+            KMSInf100: 0.47,
             dimancheHeure: 5,
             dimancheDay: 50
         }
@@ -193,13 +193,18 @@ function calculeTime()
                 if(reduc8heure.getTime() > actuelDay.getTime())
                 {
                     let nbHourUnder8 = Math.ceil((reduc8heure.getTime() - actuelDay.getTime()) / (1000 * 3600));
-                    console.log(nbHourUnder8)
+                    console.log("heure minuit 8h",nbHourUnder8)
                 }
                 else if(reduc22heure.getTime() > finDate.getTime())
                 {
+                    // let nbHourOver22 = Math.ceil((finDate.getTime() - reduc22heure.getTime()) / (1000 * 3600));
+                    // console.log("heure 22h minuit", nbHourOver22)
+
                     let nbHourUnder8 = Math.ceil((reduc8heure.getTime() - actuelDay.getTime()) / (1000 * 3600));
                     console.log(nbHourUnder8)
                 }
+
+                // console.log("nbhour", nbHour, "formule", formule, "categorie", categorie, "all", data[formule][categorie].heure)
 
                 arrayPrix.push(nbHour * data[formule][categorie].heure)
             }
