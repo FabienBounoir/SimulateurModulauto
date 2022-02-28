@@ -58,13 +58,18 @@ var data = {
 
 function initData()
 {
+    //recupere date
     var inputDebutDate = document.getElementById('debutDate');
     var inputFinDate = document.getElementById('finDate');
+
+    //recupere le nombre de kilometre
     var inputKilometreParcouru = document.getElementById('kilometre');
 
+    //recupere les heures de debut
     var debutHeure = document.getElementById('debutHeure');
     var debutMinute = document.getElementById('debutMinute');
 
+    //recupere les heures de fin
     var finHeure = document.getElementById('finHeure');
     var finMinute = document.getElementById('finMinute');
 
@@ -104,14 +109,18 @@ function calculeTime()
 
 
     //add to inputDebutDate the hour and minute
-    debutDate.setHours(debutHeure.value);
-    debutDate.setMinutes(debutMinute.value);
+    debutDate.setHours(debutHeure.value, debutMinute.value);
+    // debutDate.setMinutes(debutMinute.value);
     
-    finDate.setHours(finHeure.value);
-    finDate.setMinutes(finMinute.value);
+    finDate.setHours(finHeure.value, finMinute.value);
+    // finDate.setMinutes(finMinute.value);
+
+    console.log('lesdates', debutDate, finDate)
+    console.log(debutHeure.value, debutMinute.value)
+    console.log(finHeure.value, finMinute.value)
 
     //Check si date de fin est inferieure a date de debut
-    if(finDate < debutDate)
+    if(finDate.getTime() < debutDate.getTime())
     {
         const switched = debutDate;
 
@@ -155,65 +164,57 @@ function calculeTime()
 
     var arrayPrix = []
 
-    // console.log((finDate.getTime() - debutDate.getTime()) / (1000 * 3600 * 24))
-    // console.log(nbDay)
-
     if(nbDay == 0)
     {   
         //check si il y a plus de 10 entre actuealDay et finDate
         let nbHour = Math.ceil((finDate.getTime() - actuelDay.getTime()) / (1000 * 3600));
-        let reduc8heure = actuelDay
-        reduc8heure.setHours(8,0,0,0)
+        console.log("1 journée avec combien d'heure", nbHour)
 
-        let reduc22heure = actuelDay
+        //attribution des heures de reduction 
+        let reduc8heure = new Date(actuelDay)
+        let reduc22heure = new Date(actuelDay)
+
+        reduc8heure.setHours(8,0,0,0)
         reduc22heure.setHours(22,0,0,0)
 
-        console.log(reduc8heure, reduc22heure)
+        let nbHourUnder8 = 0
+        let nbHourOver22 = 0
 
-        if(nbHour >= 10)
+        console.log("je suis ici", reduc8heure.getTime() > actuelDay.getTime(), reduc8heure.getTime(), actuelDay.getTime())
+        if(reduc8heure.getTime() > actuelDay.getTime())
         {
-            //check if dimanche
-            if(actuelDay.getDay() == 0)
-            {
-                arrayPrix.push(totalHourOfDay * data[formule][categorie].dimancheHeure)
-            }
-            else
-            {
-                arrayPrix.push(totalHourOfDay * data[formule][categorie].heure)
-            }
+            nbHourUnder8 = Math.ceil((reduc8heure.getTime() - actuelDay.getTime()) / (1000 * 3600));
+            console.log("heure minuit 8h",nbHourUnder8)
         }
-        else
+
+        if(reduc22heure.getTime() < finDate.getTime())
         {
-            if(actuelDay.getDay() == 0)
-            {
-                arrayPrix.push(nbHour * data[formule][categorie].dimancheHeure)
-            }
-            else
-            {
-                if(reduc8heure.getTime() > actuelDay.getTime())
-                {
-                    let nbHourUnder8 = Math.ceil((reduc8heure.getTime() - actuelDay.getTime()) / (1000 * 3600));
-                    console.log("heure minuit 8h",nbHourUnder8)
-                }
-                else if(reduc22heure.getTime() > finDate.getTime())
-                {
-                    // let nbHourOver22 = Math.ceil((finDate.getTime() - reduc22heure.getTime()) / (1000 * 3600));
-                    // console.log("heure 22h minuit", nbHourOver22)
-
-                    let nbHourUnder8 = Math.ceil((reduc8heure.getTime() - actuelDay.getTime()) / (1000 * 3600));
-                    console.log(nbHourUnder8)
-                }
-
-                // console.log("nbhour", nbHour, "formule", formule, "categorie", categorie, "all", data[formule][categorie].heure)
-
-                arrayPrix.push(nbHour * data[formule][categorie].heure)
-            }
+            nbHourOver22 = Math.ceil((finDate.getTime() - reduc22heure.getTime()) / (1000 * 3600));
+            console.log("heure 22h minuit", nbHourOver22)
         }
+
+        let heureRestante = totalHourOfDay - (nbHourUnder8 + nbHourOver22)
+        console.log("les heure reduite nb", nbHourUnder8 + nbHourOver22)
+        console.log("heures restante", heureRestante)
+
+        let prix = 0;
+        prix += ((nbHourUnder8 + nbHourOver22) * (actuelDay.getDay() == 0 ? (data[formule][categorie].dimancheHeure) : (data[formule][categorie].heure))) / 2
+        prix += (heureRestante * (actuelDay.getDay() == 0 ? (data[formule][categorie].dimancheHeure) : (data[formule][categorie].heure)))
+        arrayPrix.push(prix)
+
+        //calcule nombre d'heure plusieur jour
+        totalTime.innerHTML = nbHour + " heures";
     }
     else
     {
         for(let i = 0; i < nbDay; i++)
         {
+            if(i != 0)
+            {
+                actuelDay = new Date(day.getFullYear(), day.getMonth(), day.getDate()+ i);
+                console.log("actuelDay: ", actuelDay)
+            }
+
             if(i == nbDay - 1)
             {
                 console.log("last day")
@@ -225,104 +226,121 @@ function calculeTime()
                 nextDay = new Date(day.getFullYear(), day.getMonth(), day.getDate()+ (i+1));
                 console.log(i, nextDay)
             }
-    
-            var dayOfWeek = actuelDay.getDay();
             
-            console.log("dayOfWeek", dayOfWeek)
-    
-            if(actuelDay.getDay() == 6)
+            console.log("dayOfWeek", actuelDay.getDay())
+
+            if(nextDay.getTime() - actuelDay.getTime() == 172800000)
             {
-                if(nextDay.getTime() - actuelDay.getTime() == 172800000)
-                {
-                    arrayPrix.push(totalHourOfDay * data[formule][categorie].dimancheHeure)
-                }
-                else
-                {
-                    let hour = new Date(nextDay - actuelDay).getHours()
-                    console.log("nb Heure Day: ", hour)
-                    if(hour >= 10)
-                    {
-                        arrayPrix.push(totalHourOfDay * data[formule][categorie].dimancheHeure)
-                    }
-                    else
-                    {
-                        // if(i == nbDay - 1)
-                        // {
-                        //     if(hour - 8 <= 0)
-                        //     {
-                        //         console.log("moin de 8 HERUEEEE")
-                        //         arrayPrix.push((hour * data[formule][categorie].dimancheHeure) / 2)
-                        //     }
-                        //     else
-                        //     {
-                        //         console.log("PLUS DE 8 HEURES")
-                        //         let prix = 0;
-                        //         console.log("testt: ", (8 * data[formule][categorie].dimancheHeure) / 2)
-                        //         prix += (8 * data[formule][categorie].dimancheHeure) / 2
-                        //         console.log("autreeeeeee: ", ((hour - 8) * data[formule][categorie].dimancheHeure))
-                        //         prix += ((hour - 8) * data[formule][categorie].dimancheHeure)
-                        //         arrayPrix.push(prix)
-                        //     }
-                        // }
-                        // else
-                        // {
-                        //      arrayPrix.push(hour * data[formule][categorie].dimancheHeure)
-                        // }
-                        arrayPrix.push(hour * data[formule][categorie].dimancheHeure)
-                    }
-                }
+                arrayPrix.push(totalHourOfDay * (actuelDay.getDay() == 0 ? (data[formule][categorie].dimancheHeure) : (data[formule][categorie].heure)))
             }
             else
-            {
-                console.log(nextDay.getTime() - actuelDay.getTime())
-                if(nextDay.getTime() - actuelDay.getTime() == 172800000)
+            {   
+
+                let hour = Math.ceil((nextDay - actuelDay) / 3600000)
+                console.log("nb Heure Day: ", hour)
+                if(hour >= 10)
                 {
-                    arrayPrix.push(totalHourOfDay * data[formule][categorie].heure)
-                }
-                else
-                {   
-                    let hour = new Date(nextDay - actuelDay).getHours()
-                    console.log(hour)
-                    if(hour >= 10)
+                    ///////////////nouveau avec prise des heures reduites////////////////:
+                    //if dernier jour de calcule
+                    if(i == nbDay - 1)
                     {
-                        arrayPrix.push(totalHourOfDay * data[formule][categorie].heure)
-                    }
-                    else
-                    {
-                        if(i == nbDay - 1)
+                        //if le temps est inferieur a 8h ducoup on divise par 2 le total
+                        if(hour - 8 <= 0)
                         {
-                            if(hour - 8 <= 0)
-                            {
-                                arrayPrix.push((hour * data[formule][categorie].heure) / 2)
-                            }
-                            else
-                            {
-                                let prix = 0;
-                                prix += (8 * data[formule][categorie].heure) / 2
-                                prix += ((hour - 8) * data[formule][categorie].heure)
-                                arrayPrix.push(prix)
-                            }
+                            arrayPrix.push((hour * (actuelDay.getDay() == 0 ? (data[formule][categorie].dimancheHeure) : (data[formule][categorie].heure)) / 2))
                         }
                         else
                         {
-                            arrayPrix.push(hour * data[formule][categorie].heure)
+                            let prix = 0;
+                            prix += (8 * (actuelDay.getDay() == 0 ? (data[formule][categorie].dimancheHeure) : (data[formule][categorie].heure))) / 2
+                            prix += (2 * (actuelDay.getDay() == 0 ? (data[formule][categorie].dimancheHeure) : (data[formule][categorie].heure)))
+                            arrayPrix.push(prix)
                         }
+                    }
+                    //////////reduc premier jour///////////
+                    else if(i == 0)
+                    {
+                        if(hour - 2 <= 0)
+                        {
+                            arrayPrix.push((hour * (actuelDay.getDay() == 0 ? (data[formule][categorie].dimancheHeure) : (data[formule][categorie].heure))) / 2)
+                        }
+                        else
+                        {
+                            let prix = 0;
+                            prix += (2 * (actuelDay.getDay() == 0 ? (data[formule][categorie].dimancheHeure) : (data[formule][categorie].heure))) / 2
+                            prix += (8 * (actuelDay.getDay() == 0 ? (data[formule][categorie].dimancheHeure) : (data[formule][categorie].heure)))
+                            arrayPrix.push(prix)
+                        }
+                    }
+                    else
+                    {
+                        // arrayPrix.push(hour * data[formule][categorie].heure)
+                        arrayPrix.push(totalHourOfDay * (actuelDay.getDay() == 0 ? (data[formule][categorie].dimancheHeure) : (data[formule][categorie].heure)))
+                    }
+
+                    //////////////avant sans prise en compte des heures reduite///////////////////
+                    // arrayPrix.push(totalHourOfDay * data[formule][categorie].heure)
+                }
+                else
+                {
+                    //if dernier jour de calcule
+                    if(i == nbDay - 1)
+                    {
+                        //if le temps est inferieur a 8h ducoup on divise par 2 le total
+                        if(hour - 8 <= 0)
+                        {
+                            arrayPrix.push((hour * (actuelDay.getDay() == 0 ? (data[formule][categorie].dimancheHeure) : (data[formule][categorie].heure))) / 2)
+                        }
+                        else
+                        {
+                            let prix = 0;
+                            prix += (8 * (actuelDay.getDay() == 0 ? (data[formule][categorie].dimancheHeure) : (data[formule][categorie].heure))) / 2
+                            prix += ((hour - 8) * (actuelDay.getDay() == 0 ? (data[formule][categorie].dimancheHeure) : (data[formule][categorie].heure)))
+                            arrayPrix.push(prix)
+                        }
+                    }
+                    //////////reduc premier jour///////////
+                    else if(i == 0)
+                    {
+                        if(hour - 2 <= 0)
+                        {
+                            arrayPrix.push((hour * (actuelDay.getDay() == 0 ? (data[formule][categorie].dimancheHeure) : (data[formule][categorie].heure))) / 2)
+                        }
+                        else
+                        {
+                            let prix = 0;
+                            prix += (2 * (actuelDay.getDay() == 0 ? (data[formule][categorie].dimancheHeure) : (data[formule][categorie].heure))) / 2
+                            prix += ((hour - 2) * (actuelDay.getDay() == 0 ? (data[formule][categorie].dimancheHeure) : (data[formule][categorie].heure)))
+                            arrayPrix.push(prix)
+                        }
+                    }
+                    else
+                    {
+                        arrayPrix.push(hour * (actuelDay.getDay() == 0 ? (data[formule][categorie].dimancheHeure) : (data[formule][categorie].heure)))
                     }
                 }
             }
-
-            actuelDay = new Date(day.getFullYear(), day.getMonth(), day.getDate()+ i);
         }
+
+
+        //calcule nombre d'heure plusieur jour
+        var time = finDate.getTime() - debutDate.getTime();
+        if(time < 0)
+        {
+            console.log("negatiffffff")
+            time = time * (-1)
+        }
+    
+        console.log("timeeeeee", time, finDate.getTime(), debutDate.getTime(), finDate.getTime() - debutDate.getTime())
+        var timeToHours = time / (1000 * 60 * 60);
+        
+        var timeToHoursArrondi = Math.ceil(timeToHours);
+        console.log(timeToHoursArrondi)
+        totalTime.innerHTML = timeToHoursArrondi + " heures";
     }
     
 
     console.log(arrayPrix)
-
-    var time = finDate.getTime() - debutDate.getTime();
-
-    var timeToHours = time / (1000 * 60 * 60);
-    var timeToHoursArrondi = Math.ceil(timeToHours);
-    totalTime.innerHTML = timeToHoursArrondi + " heures";
 
     var realHour = 0;
     var prixHour = 0;
