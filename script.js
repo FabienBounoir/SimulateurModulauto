@@ -12,21 +12,21 @@ var data = {
         cat1: {
             heure: 2.70,
             journee: 27,
-            KMSInf100: 0.4,
+            KMSInf100: 0.41,
             dimancheHeure: 1,
             dimancheDay: 10
         },
         cat2: {
             heure: 3,
             journee: 30,
-            KMSInf100: 0.45,
+            KMSInf100: 0.46,
             dimancheHeure: 2,
             dimancheDay: 20
         },
         cat3: {
             heure: 4,
             journee: 40,
-            KMSInf100: 0.50,
+            KMSInf100: 0.51,
             dimancheHeure: 3,
             dimancheDay: 30
         }
@@ -35,21 +35,21 @@ var data = {
         cat1: {
             heure: 4,
             journee: 40,
-            KMSInf100: 0.42,
+            KMSInf100: 0.46,
             dimancheHeure: 3,
             dimancheDay: 30
         },
         cat2: {
             heure: 5,
             journee: 50,
-            KMSInf100: 0.47,
+            KMSInf100: 0.51,
             dimancheHeure: 4,
             dimancheDay: 40
         },
         cat3: {
             heure: 6,
             journee: 60,
-            KMSInf100: 0.47,
+            KMSInf100: 0.56,
             dimancheHeure: 5,
             dimancheDay: 50
         }
@@ -73,7 +73,6 @@ function initData()
     var finHeure = document.getElementById('finHeure');
     var finMinute = document.getElementById('finMinute');
 
-    // console.log(debutDate.toISOString())
     inputDebutDate.value = debutDate.toISOString().substring(0, 10);
     inputFinDate.value = endDate.toISOString().substring(0, 10);
 
@@ -110,14 +109,7 @@ function calculeTime()
 
     //add to inputDebutDate the hour and minute
     debutDate.setHours(debutHeure.value, debutMinute.value);
-    // debutDate.setMinutes(debutMinute.value);
-    
     finDate.setHours(finHeure.value, finMinute.value);
-    // finDate.setMinutes(finMinute.value);
-
-    console.log('lesdates', debutDate, finDate)
-    console.log(debutHeure.value, debutMinute.value)
-    console.log(finHeure.value, finMinute.value)
 
     //Check si date de fin est inferieure a date de debut
     if(finDate.getTime() < debutDate.getTime())
@@ -127,7 +119,6 @@ function calculeTime()
         document.getElementById('debutDate').value = finDate.toISOString().substring(0, 10);
         document.getElementById('debutHeure').value = finHeure.value;
         document.getElementById('debutMinute').value = finMinute.value;
-        // finDate = debutDate;
         debutDate = finDate
 
             
@@ -149,26 +140,24 @@ function calculeTime()
     MaxDate.setHours(0,0,0,0)
 
     for (let index = 0; MinDate.getTime() < MaxDate.getTime(); index++) {
-        
         MinDate = new Date(initDate.getFullYear(), initDate.getMonth(), initDate.getDate()+index);
         nbDay++
     }
 
-    console.log("nombre de jour", nbDay)
+    console.log("nombre de jour: ", nbDay)
 
     var day = debutDate
 
     //get time stamp next day
     var actuelDay = day
     var nextDay = new Date(day.getFullYear(), day.getMonth(), day.getDate());
-
     var arrayPrix = []
 
     if(nbDay == 0)
     {   
         //check si il y a plus de 10 entre actuealDay et finDate
         let nbHour = Math.ceil((finDate.getTime() - actuelDay.getTime()) / (1000 * 3600));
-        console.log("1 journée avec combien d'heure", nbHour)
+        console.log("1 journée avec " +nbHour+" d'heure")
 
         //attribution des heures de reduction 
         let reduc8heure = new Date(actuelDay)
@@ -176,31 +165,32 @@ function calculeTime()
 
         reduc8heure.setHours(8,0,0,0)
         reduc22heure.setHours(22,0,0,0)
-
         let nbHourUnder8 = 0
         let nbHourOver22 = 0
 
-        console.log("je suis ici", reduc8heure.getTime() > actuelDay.getTime(), reduc8heure.getTime(), actuelDay.getTime())
+        //enlever les heures tarif reduit avant 8 heures
         if(reduc8heure.getTime() > actuelDay.getTime())
         {
             nbHourUnder8 = Math.ceil((reduc8heure.getTime() - actuelDay.getTime()) / (1000 * 3600));
-            console.log("heure minuit 8h",nbHourUnder8)
+            console.log("heure minuit 8h: ",nbHourUnder8)
         }
 
+        //enlever les heures tarif reduit apres  22 heures
         if(reduc22heure.getTime() < finDate.getTime())
         {
             nbHourOver22 = Math.ceil((finDate.getTime() - reduc22heure.getTime()) / (1000 * 3600));
-            console.log("heure 22h minuit", nbHourOver22)
+            console.log("heure 22h minuit: ", nbHourOver22)
         }
 
-        let heureRestante = totalHourOfDay - (nbHourUnder8 + nbHourOver22)
-        console.log("les heure reduite nb", nbHourUnder8 + nbHourOver22)
-        console.log("heures restante", heureRestante)
+        //recuperer les heures restantes
+        let heureRestante = nbHour - (nbHourUnder8 + nbHourOver22)
+        console.log("Nombre d'heure tarif / 2 : ", nbHourUnder8 + nbHourOver22)
+        console.log("Heures tarif normal: ", heureRestante)
 
         let prix = 0;
         prix += ((nbHourUnder8 + nbHourOver22) * (actuelDay.getDay() == 0 ? (data[formule][categorie].dimancheHeure) : (data[formule][categorie].heure))) / 2
         prix += (heureRestante * (actuelDay.getDay() == 0 ? (data[formule][categorie].dimancheHeure) : (data[formule][categorie].heure)))
-        arrayPrix.push(prix)
+        arrayPrix.push(prix > totalHourOfDay * (actuelDay.getDay() == 0 ? (data[formule][categorie].dimancheHeure) : (data[formule][categorie].heure)) ? totalHourOfDay * (actuelDay.getDay() == 0 ? (data[formule][categorie].dimancheHeure) : (data[formule][categorie].heure)) : prix)
 
         //calcule nombre d'heure plusieur jour
         totalTime.innerHTML = nbHour + " heures";
@@ -212,22 +202,20 @@ function calculeTime()
             if(i != 0)
             {
                 actuelDay = new Date(day.getFullYear(), day.getMonth(), day.getDate()+ i);
-                console.log("actuelDay: ", actuelDay)
+                console.log("ActuelDay: ", actuelDay)
             }
 
             if(i == nbDay - 1)
             {
-                console.log("last day")
+                console.log("Cas du dernier jour")
                 nextDay = finDate
-                console.log(i, nextDay)
+                console.log("Jour nb -> " + i, nextDay)
             }
             else
             {
                 nextDay = new Date(day.getFullYear(), day.getMonth(), day.getDate()+ (i+1));
-                console.log(i, nextDay)
+                console.log("Jour nb -> " + i, nextDay)
             }
-            
-            console.log("dayOfWeek", actuelDay.getDay())
 
             if(nextDay.getTime() - actuelDay.getTime() == 172800000)
             {
@@ -235,9 +223,8 @@ function calculeTime()
             }
             else
             {   
-
                 let hour = Math.ceil((nextDay - actuelDay) / 3600000)
-                console.log("nb Heure Day: ", hour)
+                console.log("Nombre d'heure du jour: ", hour)
                 if(hour >= 10)
                 {
                     ///////////////nouveau avec prise des heures reduites////////////////:
@@ -277,9 +264,6 @@ function calculeTime()
                         // arrayPrix.push(hour * data[formule][categorie].heure)
                         arrayPrix.push(totalHourOfDay * (actuelDay.getDay() == 0 ? (data[formule][categorie].dimancheHeure) : (data[formule][categorie].heure)))
                     }
-
-                    //////////////avant sans prise en compte des heures reduite///////////////////
-                    // arrayPrix.push(totalHourOfDay * data[formule][categorie].heure)
                 }
                 else
                 {
@@ -327,20 +311,17 @@ function calculeTime()
         var time = finDate.getTime() - debutDate.getTime();
         if(time < 0)
         {
-            console.log("negatiffffff")
             time = time * (-1)
         }
     
-        console.log("timeeeeee", time, finDate.getTime(), debutDate.getTime(), finDate.getTime() - debutDate.getTime())
+        console.log("TimeStamp entre debut et fin:", time)
         var timeToHours = time / (1000 * 60 * 60);
         
         var timeToHoursArrondi = Math.ceil(timeToHours);
-        console.log(timeToHoursArrondi)
         totalTime.innerHTML = timeToHoursArrondi + " heures";
     }
-    
 
-    console.log(arrayPrix)
+    console.log("Prix par jour :\n",arrayPrix)
 
     var realHour = 0;
     var prixHour = 0;
@@ -369,16 +350,17 @@ function calculeTime()
 
     //Calcule total heure (avec tarif semaine)
     arrayPrix.forEach(element => {
-        console.log("nbday", nbDay)
-        if(nbDay >= 7)
+        console.log("nombre de jour total: ", nbDay)
+        if(nbDay >= 5)
         {
-            prixHour += (element / 2);
+            prixHour += (element * 0.65);
         }
         else
         {
             prixHour += element;
         }
     });
+
     var hourAmount = document.getElementById('hourAmount');
     hourAmount.innerHTML = prixHour.toFixed(2) + " €";
     var prixKilometre = 0
@@ -396,17 +378,16 @@ function calculeTime()
         if(kilometreParcouru <= 300)
         {
             prixKilometre = 100 * data[formule][categorie].KMSInf100;
-            prixKilometre += (kilometreParcouru - 100) * 0.29;
+            prixKilometre += (kilometreParcouru - 100) * 0.30;
         }
         else
         {
             prixKilometre = 100 * data[formule][categorie].KMSInf100;
-            prixKilometre += 200 * 0.29;
-            prixKilometre += (kilometreParcouru - 300) * 0.24;
+            prixKilometre += 200 * 0.30;
+            prixKilometre += (kilometreParcouru - 300) * 0.25;
         }
     }
 
-    // console.log(prixKilometre)
     var kmAmount = document.getElementById('kmAmount');
     kmAmount.innerHTML = prixKilometre.toFixed(2) + " €";
 
