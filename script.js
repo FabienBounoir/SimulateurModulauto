@@ -168,22 +168,43 @@ function calculeTime()
         let nbHourUnder8 = 0
         let nbHourOver22 = 0
 
-        //enlever les heures tarif reduit avant 8 heures
-        if(reduc8heure.getTime() > actuelDay.getTime())
+        console.log(finDate.getTime() - actuelDay.getTime(), (totalHourOfDay * (3600000)))
+        //test si plus de 10 heure entre actuelDay et finDate
+        if(finDate.getTime() - actuelDay.getTime() < (totalHourOfDay * (3600000)))
         {
-            nbHourUnder8 = Math.ceil((reduc8heure.getTime() - actuelDay.getTime()) / (1000 * 3600));
-            console.log("heure minuit 8h: ",nbHourUnder8)
-        }
+            //enlever les heures tarif reduit avant 8 heures
+            if(reduc8heure.getTime() > actuelDay.getTime() && reduc8heure.getTime() > finDate.getTime())
+            {
+                nbHourUnder8 = Math.ceil((finDate.getTime() - actuelDay.getTime()) / (1000 * 3600));
+                console.log("heure minuit 8h icicici: ",nbHourUnder8)
 
-        //enlever les heures tarif reduit apres  22 heures
-        if(reduc22heure.getTime() < finDate.getTime())
-        {
-            nbHourOver22 = Math.ceil((finDate.getTime() - reduc22heure.getTime()) / (1000 * 3600));
-            console.log("heure 22h minuit: ", nbHourOver22)
+                nbHour = 0;
+            }
+            else if(reduc8heure.getTime() > actuelDay.getTime())
+            {
+                nbHourUnder8 = Math.ceil((reduc8heure.getTime() - actuelDay.getTime()) / (1000 * 3600));
+                console.log("heure minuit 8h: ",nbHourUnder8)
+            }
+
+            //enlever les heures tarif reduit apres  22 heures
+            if(reduc22heure.getTime() < finDate.getTime() && reduc22heure.getTime() < actuelDay.getTime())
+            {
+                nbHourOver22 = Math.floor((finDate.getTime() - actuelDay.getTime()) / (1000 * 3600));
+                console.log("heure 22h minuit: ", nbHourOver22)
+
+                nbHour = 0;
+            }
+            else if(reduc22heure.getTime() < finDate.getTime())
+            {
+                nbHourOver22 = Math.floor((finDate.getTime() - reduc22heure.getTime()) / (1000 * 3600));
+                console.log("heure 22h minuit: ", nbHourOver22)
+            }
         }
 
         //recuperer les heures restantes
         let heureRestante = nbHour - (nbHourUnder8 + nbHourOver22)
+
+        if(heureRestante < 0) heureRestante = 0
         console.log("Nombre d'heure tarif / 2 : ", nbHourUnder8 + nbHourOver22)
         console.log("Heures tarif normal: ", heureRestante)
 
