@@ -260,23 +260,29 @@ function calculeTime()
                         else
                         {
                             let prix = 0;
-                            prix += (8 * (actuelDay.getDay() == 0 ? (data[formule][categorie].dimancheHeure) : (data[formule][categorie].heure))) / 2
-                            prix += (2 * (actuelDay.getDay() == 0 ? (data[formule][categorie].dimancheHeure) : (data[formule][categorie].heure)))
+                            //reduc meme jour complet
+                            // prix += (8 * (actuelDay.getDay() == 0 ? (data[formule][categorie].dimancheHeure) : (data[formule][categorie].heure))) / 2
+                            // prix += (2 * (actuelDay.getDay() == 0 ? (data[formule][categorie].dimancheHeure) : (data[formule][categorie].heure)))
+
+                            prix += (10 * (actuelDay.getDay() == 0 ? (data[formule][categorie].dimancheHeure) : (data[formule][categorie].heure)))
+
                             arrayPrix.push(prix)
                         }
                     }
                     //////////reduc premier jour///////////
                     else if(i == 0)
                     {
-                        if(hour - 2 <= 0)
+                        if(false && hour - 2 <= 0)
                         {
                             arrayPrix.push((hour * (actuelDay.getDay() == 0 ? (data[formule][categorie].dimancheHeure) : (data[formule][categorie].heure))) / 2)
                         }
                         else
                         {
                             let prix = 0;
-                            prix += (2 * (actuelDay.getDay() == 0 ? (data[formule][categorie].dimancheHeure) : (data[formule][categorie].heure))) / 2
-                            prix += (8 * (actuelDay.getDay() == 0 ? (data[formule][categorie].dimancheHeure) : (data[formule][categorie].heure)))
+                            //reduc meme sur jour complet
+                            // prix += (2 * (actuelDay.getDay() == 0 ? (data[formule][categorie].dimancheHeure) : (data[formule][categorie].heure))) / 2
+                            // prix += (8 * (actuelDay.getDay() == 0 ? (data[formule][categorie].dimancheHeure) : (data[formule][categorie].heure)))
+                            prix += (10 * (actuelDay.getDay() == 0 ? (data[formule][categorie].dimancheHeure) : (data[formule][categorie].heure)))
                             arrayPrix.push(prix)
                         }
                     }
